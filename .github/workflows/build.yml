@@ -1,0 +1,54 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Install Android SDK
+        run: |
+          mkdir -p "$HOME/android-sdk/cmdline-tools"
+          curl -fsSL -o "$RUNNER_TEMP/cmdtools.zip" https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+          unzip -q "$RUNNER_TEMP/cmdtools.zip" -d "$HOME/android-sdk/cmdline-tools"
+          mv "$HOME/android-sdk/cmdline-tools/cmdline-tools" "$HOME/android-sdk/cmdline-tools/latest"
+          echo "ANDROID_HOME=$HOME/android-sdk" >> "$GITHUB_ENV"
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          yes | "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+          yes | "$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;37.0.0"
+          if [ -d "$HOME/android-sdk/platforms/android-37.0" ]; then
+            ln -sfn android-37.0 "$HOME/android-sdk/platforms/android-37"
+          fi
+
+      - name: Build APKs
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug assembleRelease --no-daemon
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: updateblock-release-arm64
+          path: app/build/outputs/apk/release/updateblock-release-arm64.apk
+          if-no-files-found: error
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: updateblock-debug-arm64
+          path: app/build/outputs/apk/debug/updateblock-debug-arm64.apk
+          if-no-files-found: error

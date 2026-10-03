@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nagram屏蔽更新</string>
+    <string name="xposed_description">屏蔽 Nagram 应用内更新</string>
+    <string name="status_disconnected">未连接到框架</string>
+    <string name="status_connected">框架已连接</string>
+    <string name="framework_unknown">在管理器里启用模块，作用域勾 xyz.nextalone.nagram</string>
+    <string name="framework_info">%1$s %2$s · API %3$d</string>
+    <string name="request_scope">请求作用域</string>
+    <string name="hint">Nagram：xyz.nextalone.nagram。NagramX：nu.gpu.nagram。启用后强停一次客户端。</string>
+    <string name="scope_ok">已批准 %d 个作用域</string>
+</resources>
